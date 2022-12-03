@@ -1,0 +1,12 @@
+
+/*Desktop*/
+@media (min-width: 1200px) {
+    .table-responsive{
+        overflow-x: auto;
+        position: absolute;
+        top: 5rem;
+    }
+    .formularioMax{
+        max-width: 500px !important;
+    }
+  }
