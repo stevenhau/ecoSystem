@@ -5,30 +5,36 @@ require '../config/database.php';
 $db = new Database();
 $con = $db->conectar();
 
-var_dump($_POST);
+$hoyParaConvertir = date('Y/m/d');
+$fechaComoEntero = strtotime($hoyParaConvertir);
 
-if (isset($_POST['id'])) {
+$anio = date("Y", $fechaComoEntero);
+$mes = date("m", $fechaComoEntero);
+$dia = date("d", $fechaComoEntero);
 
-    $id = $_POST['id'];
-    $nombre = $_POST['nombre'];
-    $email = $_POST['email'];
-    $telefono = $_POST['telefono'];
+    $id = $_POST['id_lote'];
+    $fecha_pago = $_POST['fecha_pago'];
+    $fecha_correspondiente = $_POST['fecha_correspondiente'];
+    $monto_pagado = $_POST['monto_pagado'];
 
-    $query = $con->prepare("UPDATE clientes SET nombre=?,email=?,telefono=? WHERE id_cliente=?");
-    $resultado = $query->execute([$nombre,$email,$telefono, $id]);
+    $comandoPagos = $con->prepare("SELECT * FROM pagos WHERE id_lote = $id");
+    $comandoPagos->execute();
+    $resultadosPagos = $comandoPagos->fetchAll(PDO::FETCH_ASSOC);
 
+    /* Validacion para que no se dupliquen los pagos realizados */
+    $yaPago = false;
+    foreach($resultadosPagos as $resultadoPago){
+        $fechaExplotada = explode("/",$resultadoPago["fecha_pago"]);
+        if($fechaExplotada[1] == $mes){
+            $yaPago = true;
+        }else{
+            $yaPago = false;
+        }
+    }
 
-}else{
-    $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
-    $email = isset($_POST['email']) ? $_POST['email'] : '';
-    $telefono = isset($_POST['telefono']) ? $_POST['telefono'] : '';
+    if($yaPago === false){
+        $query = $con->prepare("INSERT INTO pagos (id_lote, fecha_pago, fecha_correspondiente, monto_pagado) VALUES (:id_lote, :fecha_pago , :fecha_correspondiente, :monto_pagado)");
+        $resultado = $query->execute(['id_lote' => $id, 'fecha_pago' => $fecha_pago, 'fecha_correspondiente' => $fecha_correspondiente, 'monto_pagado' => $monto_pagado]);
+    }
 
-    $query = $con->prepare("INSERT INTO clientes (nombre, email, telefono) VALUES (:nombre, :email, :telefono)");
-    $resultado = $query->execute(['nombre' => $nombre, 'email' => $email, 'telefono' => $telefono]);
-}
-
-
-header('Location: index.php');
-
-?>
-
+header('Location: ../views/dashboard/pagos/listasPagosEtapas.php?id='.$_POST['id_desarrollo']);

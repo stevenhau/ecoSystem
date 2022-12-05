@@ -20,4 +20,6 @@ foreach($resultados as $key => $resultado){
     $cadena = $cadena.' <option value='.$resultado["id_lote"].'>Lote: '.$resultado["numero_lote"].' de la '.$etapa.' '.$resultado["id_etapa"].'</option>';
 }
 echo $cadena.'</select><label for=floatingSelect">Lotes</label>';
+
+
 ?>
