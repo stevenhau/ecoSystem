@@ -71,6 +71,7 @@ $resultados = $comando->fetchAll(PDO::FETCH_ASSOC);
                         <th>PAGO TOTAL MENSUAL</th>
                         <th>FECHA DE COMPRA</th>
                         <th>PRIMER MENSUALIDAD</th>
+                        <th>FECHA CUANDO RALIZO EL PAGO</th>
                         <th>DIAS DE PAGO</th>
                         <th>NOMBRE</th>
                         <th>MTTO.</th>
@@ -132,7 +133,9 @@ $resultados = $comando->fetchAll(PDO::FETCH_ASSOC);
 
                         /* Validacion para que no se dupliquen los pagos realizados */
                         $yaPago = false;
+                        $fechaCaundoPago = "";
                         foreach ($resultadosPagos as $resultadoPago) {
+                            $fechaCaundoPago = $resultadoPago["fecha_pago"];
                             $fechaExplotada = explode("/", $resultadoPago["fecha_pago"]);
                             if ($fechaExplotada[1] == $mes) {
                                 $yaPago = true;
@@ -156,6 +159,7 @@ $resultados = $comando->fetchAll(PDO::FETCH_ASSOC);
                             <td class="<?= $yaPago === false ? "sinPago" : "pagado"; ?>"><?= $yaPago === false ? "Aún No Paga!" : "$" . number_format(intval($resultadoPago["monto_pagado"]), 2); ?></td>
                             <td><?= $fecha_compra; ?></td>
                             <td><?= $primer_mensualidad; ?></td>
+                            <td><?=$fechaCaundoPago;?></td>
                             <td><?= $dias_pago; ?></td>
                             <td><?= $cliente; ?></td>
                             <td><?= "$" . number_format(intval($resultado["mantenimiento"]), 2); ?></td>
@@ -169,7 +173,7 @@ $resultados = $comando->fetchAll(PDO::FETCH_ASSOC);
                                     <input type="hidden" name="fecha_correspondiente" value="<?= $fecha_correspondiente; ?>">
                                     <input type="hidden" name="monto_pagado" value="<?= $monto_mensual; ?>">
                                     <?php
-                                    if ($resultado["estatus"] == 4 || $resultado["estatus"] == 3 || $resultado["estatus"] == 1) {
+                                    if ($resultado["estatus"] == 4 || $resultado["estatus"] == 3 || $resultado["estatus"] == 1 || empty($primer_mensualidad)) {
                                     }else{
                                     if ($yaPago === false) {
 
@@ -189,7 +193,7 @@ $resultados = $comando->fetchAll(PDO::FETCH_ASSOC);
 
                                 <form>
                                     <?php
-                                    if ($resultado["estatus"] == 4 || $resultado["estatus"] == 3 || $resultado["estatus"] == 1) {
+                                    if ($resultado["estatus"] == 4 || $resultado["estatus"] == 3 || $resultado["estatus"] == 1 || empty($primer_mensualidad)) {
                                     } else {
 
                                         if ($yaPago === false) {
@@ -209,7 +213,7 @@ $resultados = $comando->fetchAll(PDO::FETCH_ASSOC);
                             </td>
                             <td>
                                 <?php
-                                if ($resultado["estatus"] == 4 || $resultado["estatus"] == 3 || $resultado["estatus"] == 1) {}else{
+                                if ($resultado["estatus"] == 4 || $resultado["estatus"] == 3 || $resultado["estatus"] == 1 || empty($primer_mensualidad)) {}else{
                                 ?>
                                     <form action="../pagos/comprobante.php" method="POST">
                                         <input type="hidden" name="id_desarrollo" value="<?= $id; ?>">

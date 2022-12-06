@@ -48,9 +48,10 @@ $comandoPagos = $con->prepare("SELECT * FROM pagos WHERE id_lote = $id_lote");
 $comandoPagos->execute();
 $resultadosPagos = $comandoPagos->fetchAll(PDO::FETCH_ASSOC);
 
-$mensualidadesPagadas = count($resultadosPagos);
+
 
 foreach ($resultadosPagos as $resultadoPagos) {
+    $mensualidadesPagadas = $resultadoPagos["pago_numero"];
 
     $diaQuePago = strtotime($resultadoPagos["fecha_pago"]);
 
