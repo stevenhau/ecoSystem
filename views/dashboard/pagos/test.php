@@ -25,14 +25,28 @@ $anioSeleccionado = 2021;
 $resultadosArrayLotes = [];
 foreach ($resultadosLotes as $lote) {
     $idLote = $lote["id_lote"];
-    $comandoPagos = $con->prepare("SELECT * FROM pagos WHERE id_lote = $idLote AND mes = $mesSeleccionado AND anio = $anioSeleccionado");
-    $comandoPagos->execute();
-    $resultadosPagos = $comandoPagos->fetchAll(PDO::FETCH_ASSOC);
-    if (!empty($resultadosPagos)) {
-        foreach ($resultadosPagos as $pago) {
-            if ($lote["id_lote"] == $pago["id_lote"]) {
-                $lotesConPagos = array_merge($lote, $pago);
-                array_push($resultadosArrayLotes, $lotesConPagos);
+    /** Consulta para agregar la ventas primero hacemos las ventas porque sin ventas no puede existir pagos */
+    $comandoVentas = $con->prepare("SELECT nombre_cliente, id_lote, enganche, num_mensualidades, fecha_compra, primer_mensualidad, dias_pago, monto_mensual FROM ventas WHERE id_lote = $idLote");
+    $comandoVentas->execute();
+    $resultadosVentas = $comandoVentas->fetchAll(PDO::FETCH_ASSOC);
+    if (!empty($resultadosVentas)) {//Si resultado no esta vacio es que existen ventas
+        foreach ($resultadosVentas as $venta) {
+            if ($lote["id_lote"] == $venta["id_lote"]) {
+                /** Consulta para agregar los pagos */
+                $comandoPagos = $con->prepare("SELECT * FROM pagos WHERE id_lote = $idLote AND mes = $mesSeleccionado AND anio = $anioSeleccionado");
+                $comandoPagos->execute();
+                $resultadosPagos = $comandoPagos->fetchAll(PDO::FETCH_ASSOC);
+                if (!empty($resultadosPagos)) {//Si resultado no esta vacio es que existen pagos
+                    foreach ($resultadosPagos as $pago) {
+                        if ($lote["id_lote"] == $pago["id_lote"]) {
+                            $lotesConPagos = array_merge($lote, $venta, $pago);
+                            array_push($resultadosArrayLotes, $lotesConPagos);
+                        }
+                    }
+                }else{
+                    $lotesVendidos = array_merge($lote, $venta);
+                    array_push($resultadosArrayLotes, $lotesVendidos);
+                }
             }
         }
     } else {
@@ -40,11 +54,62 @@ foreach ($resultadosLotes as $lote) {
     }
 }
 
-echo '<pre>';
+/* echo '<pre>';
 print_r($resultadosArrayLotes);
-echo '</pre>';
+echo '</pre>'; */
 
 ?>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Lote</th>
+            <th><?= $id == 1 ? "Etapa" : "Manzana"; ?></th>
+            <th>MEDIDA/M2</th>
+            <th>COSTO TOTAL</th>
+            <th>ENGANCHE</th>
+            <th>NO. DE MENSUALIDADES</th>
+            <th>PAGO NUMERO</th>
+            <th>MENSUALIDAD</th>
+            <th>INTERES 5%</th>
+            <th>MONTO PAGADO</th>
+            <th>FECHA DE COMPRA</th>
+            <th>PRIMER MENSUALIDAD</th>
+            <th>FECHA CUANDO RALIZO EL PAGO</th>
+            <th>DIAS DE PAGO</th>
+            <th>NOMBRE</th>
+            <th>MTTO.</th>
+            <th>Estatus</th>
+            <th>Pagar Mensualidad</th>
+            <th>Pago a Capital</th>
+            <th>Descargar Comprobante</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($resultadosArrayLotes as $resultado) {?>
+                <tr>
+                    <td><?=isset($resultado["numero_lote"]) ?$resultado["numero_lote"] : "";?></td>
+                    <td><?=isset($resultado["id_etapa"]) ?$resultado["id_etapa"] : "";?></td>
+                    <td><?=isset($resultado["medida"]) ? $resultado["medida"] : "";?></td>
+                    <td><?=isset($resultado["costo"]) ? $resultado["costo"] : "";?></td>
+                    <td><?=isset($resultado["enganche"]) ? $resultado["enganche"] : "";?></td>
+                    <td><?=isset($resultado["num_mensualidades"]) ? $resultado["num_mensualidades"] : "";?></td>
+                    <td><?=isset($resultado["pago_numero"]) ? $resultado["pago_numero"] : "";?></td>
+                    <td><?=isset($resultado["monto_mensual"]) ? $resultado["monto_mensual"] : "";?></td>
+                    <td></td>
+                    <td><?=isset($resultado["monto_pagado"]) &&  $resultado["monto_pagado"] != 0 ? $resultado["monto_pagado"] : "AUN NO PAGA!";?></td>
+                    <td><?=isset($resultado["fecha_compra"]) ? $resultado["fecha_compra"] : "";?></td>
+                    <td><?=isset($resultado["primer_mensualidad"]) ? $resultado["primer_mensualidad"] : "";?></td>
+                    <td><?=isset($resultado["fecha_pago"]) ? $resultado["fecha_pago"] : "";?></td>
+                    <td><?=isset($resultado["dias_pago"]) ? $resultado["dias_pago"] : "";?></td>
+                    <td><?=isset($resultado["nombre_cliente"]) ? $resultado["nombre_cliente"] : "";?></td>
+                    <td><?=isset($resultado["mantenimiento"]) ? $resultado["mantenimiento"] : "";?></td>
+                    <td><?=isset($resultado["estatus"]) ? $resultado["estatus"] : "";?></td>
+                    <td>botones</td>
+                    <td>botones</td>
+                    <td>botones</td>
+                </tr>
 
-
+        <?php } ?>
+    </tbody>
+</table>
 <?php include('../layouts/footer.php'); ?>
