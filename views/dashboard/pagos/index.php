@@ -29,7 +29,7 @@ $resultados = $comando->fetchAll(PDO::FETCH_ASSOC);
                             
                             <td><?=$resultado["nombre_desarrollo"];?></td>
                             <td>
-                                <a class="btn btn-warning btn-block" href="../pagos/listasPagosEtapas.php?id=<?php echo $resultado['id_desarrollo']; ?>"><?= $resultado['id_desarrollo'] == 1 ? 'Ver Pagos' : 'Ver Pagos'?></a>
+                                <a class="btn btn-warning btn-block" href="../pagos/pagos.php?id=<?php echo $resultado['id_desarrollo']; ?>"><?= $resultado['id_desarrollo'] == 1 ? 'Ver Pagos' : 'Ver Pagos'?></a>
                             </td>
                         </tr>
                     <?php }?>

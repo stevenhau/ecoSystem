@@ -1,3 +1,27 @@
+/* Generales */
+
+.disponible {
+    background-color: #fff;
+}
+
+.vendido {
+    background-color: #FFA420;
+}
+
+.apartado {
+    background-color: #ffff00;
+}
+
+.otro {
+    background-color: #90CAF9;
+}
+.pagado{
+    background-color: green !important;
+}
+.sinPago{
+    background-color: #fff !important;
+}
+
 
 /*Desktop*/
 @media (min-width: 1200px) {
