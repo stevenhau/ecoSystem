@@ -50,31 +50,11 @@ $comandoPagos = $con->prepare("SELECT * FROM pagos WHERE id_lote = $id AND mes =
 $comandoPagos->execute();
 $resultadosPagos = $comandoPagos->fetchAll(PDO::FETCH_ASSOC);
 
-echo '<pre>';
-var_dump(['id_lote' => $id, 'fecha_pago' => $fecha_pago, 'fecha_correspondiente' => $fecha_correspondiente, 'monto_pagado' => $monto_pagado, 'mes' => $mesSeleccionado, 'anio' => $anioSeleccionado, 'pago_numero' => $pagoNumero]);
-echo '</pre>';
-exit();
-
-
 if (empty($resultadosPagos)) {
     $query = $con->prepare("INSERT INTO pagos (id_lote, fecha_pago, fecha_correspondiente, monto_pagado, mes, anio, pago_numero) VALUES (:id_lote, :fecha_pago , :fecha_correspondiente, :monto_pagado, :mes, :anio, :pago_numero)");
     $resultado = $query->execute(['id_lote' => $id, 'fecha_pago' => $fecha_pago, 'fecha_correspondiente' => $fecha_correspondiente, 'monto_pagado' => $monto_pagado, 'mes' => $mesSeleccionado, 'anio' => $anioSeleccionado, 'pago_numero' => $pagoNumero]);
 }
 
 
-/* Validacion para que no se dupliquen los pagos realizados */
-$yaPago = false;
-foreach ($resultadosPagos as $resultadoPago) {
-    $pagoNumero = $resultadoPago["pago_numero"] + 1;
-    $fechaExplotada = explode("/", $resultadoPago["fecha_pago"]);
-    if ($fechaExplotada[1] == $mes) {
-        $yaPago = true;
-    } else {
-        $yaPago = false;
-    }
-}
 
-if ($yaPago === false) {
-}
-
-/* header('Location: ../views/dashboard/pagos/listasPagosEtapas.php?id='.$_POST['id_desarrollo']); */
+header('Location: ../views/dashboard/pagos/listasPagosEtapas.php?id='.$_POST['id_desarrollo']);
