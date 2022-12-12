@@ -6,9 +6,13 @@ $con = $db->conectar();
 
 $id_desarrollo = $_POST["id_desarrollo"];
 $id_lote = $_POST["id_lote"];
+$mesSeleccionado = $_POST["mes"];
+$anioSeleccionado = $_POST["anio"];
 
 $meses = array("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre");
 $hoy = date('d/m/Y');
+
+$mesNombreSeleccionado =  $meses[$mesSeleccionado - 1];
 
 
 $hoyParaConvertir = date('Y/m/d');
@@ -35,16 +39,17 @@ foreach ($resultados as $resultado) {
     $etapa = $resultado["id_etapa"];
 }
 
-$comandoVentas = $con->prepare("SELECT * FROM ventas WHERE id_lote = $id_lote");
+$comandoVentas = $con->prepare("SELECT nombre_cliente, id_lote, enganche, num_mensualidades, fecha_compra, primer_mensualidad, dias_pago, monto_mensual FROM ventas WHERE id_lote = $id_lote");
 $comandoVentas->execute();
 $resultadosVentas = $comandoVentas->fetchAll(PDO::FETCH_ASSOC);
 
 foreach ($resultadosVentas as $resultadoVentas) {
     $totalMensualidades = $resultadoVentas["num_mensualidades"];
+    $dia_Pago = $resultadoVentas["dias_pago"];
 }
 
 
-$comandoPagos = $con->prepare("SELECT * FROM pagos WHERE id_lote = $id_lote");
+$comandoPagos = $con->prepare("SELECT * FROM pagos WHERE id_lote = $id_lote AND mes = $mesSeleccionado AND anio = $anioSeleccionado");
 $comandoPagos->execute();
 $resultadosPagos = $comandoPagos->fetchAll(PDO::FETCH_ASSOC);
 
@@ -59,7 +64,7 @@ foreach ($resultadosPagos as $resultadoPagos) {
 }
 
 
-$nombrePDF = $nombreCliente . $mes . $anio;
+$nombrePDF = $nombreCliente . $mesNombreSeleccionado . ' ' . $anioSeleccionado;
 
 ob_start();
 
@@ -151,14 +156,14 @@ ob_start();
     <div class="contenedor">
         <div class="encabezado">
             <p class="numeroRecibo">
-                <img style="position: absolute;" src="http://<?php echo $_SERVER['HTTP_HOST'];?>/ecoSystem/logo-modified.png" alt="" width="90px">
+                <img style="position: absolute;" src="http://<?php echo $_SERVER['HTTP_HOST']; ?>/ecoSystem/logo-modified.png" alt="" width="90px">
                 <span>Recibo N.° <?= $mensualidadesPagadas; ?>
                 </span>
             </p>
             <p class="titulo">RECIBO DE PAGO</p>
         </div>
         <div class="fecha">
-            <p>Cancun, Quintana Roo a <?= ' ' . $dia . ' del mes de ' . $mes . ' del año ' . $anio . ''; ?> </p>
+            <p>Cancun, Quintana Roo a <?= ' ' . $dia_Pago . ' del mes de ' . $mesNombreSeleccionado . ' del año ' . $anioSeleccionado . ''; ?> </p>
         </div>
 
         <div class="persona">
@@ -184,9 +189,9 @@ ob_start();
 
         <div class="firmas">
             <div class="firmaEmpresa" style="position: absolute;">
-                <img src="http://<?php echo $_SERVER['HTTP_HOST'];?>/ecoSystem/firma_etapa_1.png" width="90px" alt="">
+                <img src="http://<?php echo $_SERVER['HTTP_HOST']; ?>/ecoSystem/<?= $etapa != 2 ? 'firma_etapa_1.png' : 'firma_etapa_2.png';?>" width="90px" alt="">
                 <p>Recibí.</p>
-                <p>C. SERAFINA CANUL KUMUL.</p>
+                <p><?= $etapa != 2 ? 'C. SERAFINA CANUL KUMUL.' : 'JOSE JAVIER BETANCOURT CANUL.';?> </p>
             </div>
             <div class="firmaCliente" style="position: absolute;right:5%;bottom:22%">
                 <p>Recibí.</p>
@@ -201,7 +206,9 @@ ob_start();
 $html = ob_get_clean();
 
 require_once '../../../libs/dompdf/autoload.inc.php';
+
 use Dompdf\Dompdf;
+
 $dompdf = new Dompdf();
 
 $options = $dompdf->getOptions();

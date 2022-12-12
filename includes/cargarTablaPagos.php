@@ -61,8 +61,13 @@ foreach ($resultadosLotes as $lote) {
 }
 
 foreach ($resultadosArrayLotes as $resultado) {
+    $dias = "";
+    isset($resultado["dias_pago"]) ? $dias = $resultado["dias_pago"] : "";
+    $fecha_correspondiente =  $dias . '/' . $mesSeleccionado . '/' . $anioSeleccionado;
     $colorFila = "";
     $status = "";
+    $aunNoPaga = "";
+    if(isset($resultado["primer_mensualidad"])){$aunNoPaga ="AUN NO PAGA!";}
     if ($resultado["estatus"] == 1) {
         $colorFila = "disponible";
         $status = "disponible";
@@ -90,7 +95,7 @@ foreach ($resultadosArrayLotes as $resultado) {
         <td><?= isset($resultado["pago_numero"]) ? $resultado["pago_numero"] : ""; ?></td>
         <td><?= isset($resultado["monto_mensual"]) ? $resultado["monto_mensual"] : ""; ?></td>
         <td></td>
-        <td><?= isset($resultado["monto_pagado"]) &&  $resultado["monto_pagado"] != 0 ? $resultado["monto_pagado"] : "AUN NO PAGA!"; ?></td>
+        <td><?= isset($resultado["monto_pagado"]) &&  $resultado["monto_pagado"] != 0 ? $resultado["monto_pagado"] : $aunNoPaga; ?></td>
         <td><?= isset($resultado["fecha_compra"]) ? $resultado["fecha_compra"] : ""; ?></td>
         <td><?= isset($resultado["primer_mensualidad"]) ? $resultado["primer_mensualidad"] : ""; ?></td>
         <td><?= isset($resultado["fecha_pago"]) ? $resultado["fecha_pago"] : ""; ?></td>
@@ -98,9 +103,32 @@ foreach ($resultadosArrayLotes as $resultado) {
         <td><?= isset($resultado["nombre_cliente"]) ? $resultado["nombre_cliente"] : ""; ?></td>
         <td><?= isset($resultado["mantenimiento"]) ? $resultado["mantenimiento"] : ""; ?></td>
         <td><?= isset($resultado["estatus"]) ? $status : ""; ?></td>
+        <td>
+            <?php if (isset($resultado["primer_mensualidad"])) { ?>
+                <form action="../../../includes/pagoMensual.php" method="POST">
+                    <input type="hidden" name="id_desarrollo" value="<?= $id; ?>">
+                    <input type="hidden" name="id_lote" value="<?= $resultado["id_lote"]; ?>">
+                    <input type="hidden" name="fecha_pago" value="<?= $hoy; ?>">
+                    <input type="hidden" name="fecha_correspondiente" value="<?= $fecha_correspondiente; ?>">
+                    <input type="hidden" name="monto_pagado" value="<?= isset($resultado["monto_mensual"]); ?>">
+                    <input type="hidden" name="mes" value="<?= $mesSeleccionado; ?>">
+                    <input type="hidden" name="anio" value="<?= $anioSeleccionado; ?>">
+                    <input type="submit" class="btn btn-success btn-block" value="Pagar Mensualidad">
+                </form>
+            <?php } ?>
+        </td>
         <td>botones</td>
-        <td>botones</td>
-        <td>botones</td>
+        <td>
+            <?php if (isset($resultado["primer_mensualidad"])) { ?>
+                <form action="../pagos/comprobante.php" method="POST">
+                    <input type="hidden" name="id_desarrollo" value="<?= $id; ?>">
+                    <input type="hidden" name="id_lote" value="<?= $resultado["id_lote"]; ?>">
+                    <input type="hidden" name="mes" value="<?= $mesSeleccionado; ?>">
+                    <input type="hidden" name="anio" value="<?= $anioSeleccionado; ?>">
+                    <input type="submit" class="btn btn-primary btn-block" value="Descargar Comprobante">
+                </form>
+            <?php } ?>
+        </td>
     </tr>
 
 <?php } ?>
